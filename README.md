@@ -89,11 +89,13 @@ Follow these instructions to set up the tool on your system.
 
 2. **Interact with AWS Services**:
    - Choose from the menu to manage EC2 instances, S3 buckets, or Route53 domains.
+  
 
 ## Notes
 
 - Ensure that your AWS credentials are configured correctly. You will be prompted to enter your AWS Access Key ID and Secret Access Key when running the tool.
 - The tool uses boto3 to interact with AWS services. Ensure you have the necessary permissions for the operations you want to perform.
+- the test.png is there to put it inside the s3 bucket for testing 
 
 ## License
 
