@@ -1,4 +1,4 @@
-# AWS CLI Management Tool
+# Platform-Engineering-Python-Exercise
 
 This CLI tool allows you to manage AWS services including EC2, S3, and Route53. It provides a command-line interface to create and manage EC2 instances, S3 buckets, and Route53 domains.
 
