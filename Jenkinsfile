@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        PYTHON_ENV = 'venv_py'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,10 +12,12 @@ pipeline {
             }
         }
 
-        stage('Install Dependencies') {
+        stage('Setup Virtual Environment') {
             steps {
                 sh '''
-                pip install -r requirements.txt || { echo "Failed to install dependencies."; exit 1; }
+                python3 -m venv ${PYTHON_ENV}
+                source ${PYTHON_ENV}/bin/activate
+                pip install -r requirements.txt
                 '''
             }
         }
@@ -19,7 +25,8 @@ pipeline {
         stage('Run Script') {
             steps {
                 sh '''
-                python main.py || { echo "Script execution failed."; exit 1; }
+                source ${PYTHON_ENV}/bin/activate
+                python main.py
                 '''
             }
         }
@@ -27,8 +34,10 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up...'
-            // אפשר להוסיף כאן פעולות ניקוי נוספות אם נדרשות
+            sh '''
+            deactivate || true
+            rm -rf ${PYTHON_ENV}
+            '''
         }
     }
 }
