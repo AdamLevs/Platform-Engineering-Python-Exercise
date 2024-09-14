@@ -8,6 +8,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
+                echo 'Checking out source code from SCM...'
                 checkout scm
             }
         }
@@ -15,14 +16,17 @@ pipeline {
         stage('Setup Virtual Environment') {
             steps {
                 script {
-                    sh '''
-                    echo "Creating virtual environment..."
-                    python3 -m venv ${PYTHON_ENV}
-                    echo "Activating virtual environment..."
-                    source ${PYTHON_ENV}/bin/activate
-                    echo "Installing dependencies..."
-                    pip install -r requirements.txt
-                    '''
+                    timeout(time: 1, unit: 'MINUTES') { // Set timeout for this stage
+                        echo 'Creating virtual environment...'
+                        sh '''
+                        python3 -m venv ${PYTHON_ENV} || { echo "Failed to create virtual environment"; exit 1; }
+                        echo "Virtual environment created successfully"
+                        source ${PYTHON_ENV}/bin/activate || { echo "Failed to activate virtual environment"; exit 1; }
+                        echo "Virtual environment activated"
+                        pip install -r requirements.txt || { echo "Failed to install requirements"; exit 1; }
+                        echo "Requirements installed successfully"
+                        '''
+                    }
                 }
             }
         }
@@ -30,12 +34,14 @@ pipeline {
         stage('Run Script') {
             steps {
                 script {
-                    sh '''
-                    echo "Activating virtual environment..."
-                    source ${PYTHON_ENV}/bin/activate
-                    echo "Running script..."
-                    python main.py
-                    '''
+                    timeout(time: 1, unit: 'MINUTES') { // Set timeout for this stage
+                        echo 'Running Python script...'
+                        sh '''
+                        source ${PYTHON_ENV}/bin/activate || { echo "Failed to activate virtual environment"; exit 1; }
+                        python main.py || { echo "Python script failed"; exit 1; }
+                        echo "Python script ran successfully"
+                        '''
+                    }
                 }
             }
         }
@@ -43,10 +49,25 @@ pipeline {
 
     post {
         always {
+            echo 'Cleaning up...'
             sh '''
-            echo "Deactivating and removing virtual environment..."
             deactivate || true
-            rm -rf ${PYTHON_ENV}
+            rm -rf ${PYTHON_ENV} || { echo "Failed to remove virtual environment"; exit 1; }
+            echo "Cleanup completed"
+            '''
+        }
+        failure {
+            echo 'Build failed. Cleaning up...'
+            sh '''
+            rm -rf ${PYTHON_ENV} || { echo "Failed to remove virtual environment"; exit 1; }
+            echo "Cleanup completed"
+            '''
+        }
+        aborted {
+            echo 'Build aborted. Cleaning up...'
+            sh '''
+            rm -rf ${PYTHON_ENV} || { echo "Failed to remove virtual environment"; exit 1; }
+            echo "Cleanup completed"
             '''
         }
     }
