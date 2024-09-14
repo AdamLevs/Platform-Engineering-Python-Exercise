@@ -8,7 +8,6 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                echo 'Checking out source code from SCM...'
                 checkout scm
             }
         }
@@ -16,47 +15,28 @@ pipeline {
         stage('Setup Virtual Environment') {
             steps {
                 script {
-                    timeout(time: 1, unit: 'MINUTES') {
-                        echo 'Creating virtual environment...'
-                        sh '''
-                        python3 -m venv ${PYTHON_ENV} || {
-                            echo "Failed to create virtual environment";
-                            exit 1;
-                        }
+                    // Create and activate virtual environment, then install dependencies
+                    sh '''
+                        python3 -m venv ${PYTHON_ENV} || { echo "Failed to create virtual environment"; exit 1; }
                         echo "Virtual environment created successfully"
-                        source ${PYTHON_ENV}/bin/activate || {
-                            echo "Failed to activate virtual environment";
-                            exit 1;
-                        }
+                        source ${PYTHON_ENV}/bin/activate || { echo "Failed to activate virtual environment"; exit 1; }
                         echo "Virtual environment activated"
-                        pip install -r requirements.txt || {
-                            echo "Failed to install requirements";
-                            exit 1;
-                        }
+                        pip install -r requirements.txt || { echo "Failed to install requirements"; exit 1; }
                         echo "Requirements installed successfully"
-                        '''
-                    }
+                    '''
                 }
             }
         }
 
-        stage('Run Script') {
+        stage('Run main.py') {
             steps {
                 script {
-                    timeout(time: 1, unit: 'MINUTES') {
-                        echo 'Running Python script...'
-                        sh '''
-                        source ${PYTHON_ENV}/bin/activate || {
-                            echo "Failed to activate virtual environment";
-                            exit 1;
-                        }
-                        python main.py || {
-                            echo "Python script failed";
-                            exit 1;
-                        }
-                        echo "Python script ran successfully"
-                        '''
-                    }
+                    // Run the main.py script
+                    sh '''
+                        source ${PYTHON_ENV}/bin/activate
+                        python main.py || { echo "Failed to run main.py"; exit 1; }
+                        echo "main.py executed successfully"
+                    '''
                 }
             }
         }
@@ -64,35 +44,17 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up...'
-            sh '''
-            deactivate || true
-            rm -rf ${PYTHON_ENV} || {
-                echo "Failed to remove virtual environment";
-                exit 1;
+            script {
+                echo "Cleaning up..."
+                sh '''
+                    if [ -d "${PYTHON_ENV}" ]; then
+                        rm -rf ${PYTHON_ENV}
+                    fi
+                '''
             }
-            echo "Cleanup completed"
-            '''
         }
         failure {
-            echo 'Build failed. Cleaning up...'
-            sh '''
-            rm -rf ${PYTHON_ENV} || {
-                echo "Failed to remove virtual environment";
-                exit 1;
-            }
-            echo "Cleanup completed"
-            '''
-        }
-        aborted {
-            echo 'Build aborted. Cleaning up...'
-            sh '''
-            rm -rf ${PYTHON_ENV} || {
-                echo "Failed to remove virtual environment";
-                exit 1;
-            }
-            echo "Cleanup completed"
-            '''
+            echo "Build failed. Check the logs for details."
         }
     }
 }
