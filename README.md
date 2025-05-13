@@ -1,22 +1,54 @@
 # AWS Multi-Service CLI
 
-A Python-based CLI tool for managing AWS infrastructure through EC2, S3, and Route53.  
-Designed for learning, automation, and hands-on DevOps practice.
+A modular Python CLI tool that interacts with AWS services including:
+- EC2
+- S3
+- Route53
+- CloudWatch (via `watchtower`)
 
-## 🚀 Features
+Supports session-based AWS credentials and structured CLI via `argparse`.
 
-- 🖥 Create, list, start/stop, and terminate EC2 instances (with optional VPC/Subnet creation)
-- ☁️ Create and manage S3 buckets, upload files, and delete resources
-- 🌐 Create Route53 hosted zones and manage DNS records
-- 🔐 Works with temporary AWS credentials via Boto3 session
-- 🛠 Jenkinsfile for CI/CD automation
-- 🐍 Built with modular Python scripts for reusability
+---
 
-## 📦 Setup & Run
+## 📦 Features
+
+- Manage EC2 instances (create/list/start/stop/terminate)
+- Manage S3 buckets (create/list/upload/delete)
+- Manage Route53 domains and DNS records
+- Send logs to CloudWatch from CLI with `watchtower`
+- Docker-ready for containerized execution
+- Jenkins-compatible for CI/CD integration
+
+---
+
+## 🚀 How to Run
+
+### 🐍 Locally with Python
+
+Install dependencies:
 
 ```bash
-git clone https://github.com/AdamLevs/aws-multi-service-cli.git
-cd aws-multi-service-cli
-python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-python main.py
+python main.py \
+  --service cloudwatch \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --region us-east-1 \
+  --action test-log
+```
+---
+
+### 🐳 Running with Docker
+```bash
+docker build -t aws-cli-app .
+```
+#### Run the container:
+```bash
+docker run aws-cli-app \
+  --service cloudwatch \
+  --access_key YOUR_ACCESS_KEY \
+  --secret_key YOUR_SECRET_KEY \
+  --region us-east-1 \
+  --action docker-log
+```
+
