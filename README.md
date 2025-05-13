@@ -36,13 +36,14 @@ python main.py \
   --region us-east-1 \
   --action test-log
 ```
----
 
-### 🐳 Running with Docker
+## 🐳 Running with Docker
+
 ```bash
 docker build -t aws-cli-app .
 ```
 #### Run the container:
+
 ```bash
 docker run aws-cli-app \
   --service cloudwatch \
