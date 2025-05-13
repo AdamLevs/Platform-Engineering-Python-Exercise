@@ -12,49 +12,43 @@ pipeline {
             }
         }
 
-        stage('Setup Virtual Environment') {
+        stage('Setup Python Env') {
             steps {
-                script {
-                    // Create and activate virtual environment, then install dependencies
-                    sh '''
-                        python3 -m venv ${PYTHON_ENV} || { echo "Failed to create virtual environment"; exit 1; }
-                        echo "Virtual environment created successfully"
-                        source ${PYTHON_ENV}/bin/activate || { echo "Failed to activate virtual environment"; exit 1; }
-                        echo "Virtual environment activated"
-                        pip install -r requirements.txt || { echo "Failed to install requirements"; exit 1; }
-                        echo "Requirements installed successfully"
-                    '''
-                }
+                sh '''
+                    python3 -m venv ${PYTHON_ENV}
+                    . ${PYTHON_ENV}/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
             }
         }
 
-        stage('Run main.py') {
+        stage('Run main.py with argparse') {
             steps {
-                script {
-                    // Run the main.py script
-                    sh '''
-                        source ${PYTHON_ENV}/bin/activate
-                        python main.py || { echo "Failed to run main.py"; exit 1; }
-                        echo "main.py executed successfully"
-                    '''
-                }
+                sh '''
+                    . ${PYTHON_ENV}/bin/activate
+                    python main.py --service cloudwatch --action log-test
+                '''
+            }
+        }
+
+        stage('Docker Build & Run') {
+            steps {
+                sh '''
+                    docker build -t aws-cli-app .
+                    docker run aws-cli-app --service cloudwatch --action docker-log
+                '''
             }
         }
     }
 
     post {
         always {
-            script {
-                echo "Cleaning up..."
-                sh '''
-                    if [ -d "${PYTHON_ENV}" ]; then
-                        rm -rf ${PYTHON_ENV}
-                    fi
-                '''
-            }
-        }
-        failure {
-            echo "Build failed. Check the logs for details."
+            sh '''
+                if [ -d "${PYTHON_ENV}" ]; then
+                    rm -rf ${PYTHON_ENV}
+                fi
+            '''
         }
     }
 }
