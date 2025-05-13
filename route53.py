@@ -155,7 +155,7 @@ def delete_domain(route53_client):
                 break
         else:
             print(f"No hosted zones found with the tag {UNIQUE_TAG_KEY}={UNIQUE_TAG_VALUE}.")
-            print("You may need to create a domain first.")
+            print("You need to create a domain first.")
     except ClientError as e:
         print(f"Error listing hosted zones: {e}")
 
