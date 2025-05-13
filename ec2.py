@@ -15,7 +15,6 @@ def main(ec2_client):
 
         # Create instance
         if ec2_choice == "1":
-            # Ask if user has existing VPC
             has_vpc = input("Do you have an existing VPC? (yes/no): ").strip().lower()
             if has_vpc == "yes":
                 vpc_id = input("Enter your existing VPC ID: ").strip()
@@ -42,7 +41,6 @@ def main(ec2_client):
                     print(f"Error creating VPC: {e}")
                     continue
 
-            # Ask if existing Subnet
             has_subnet = input("Do you have an existing Subnet in the VPC? (yes/no): ").strip().lower()
             if has_subnet == "yes":
                 subnet_id = input("Enter your existing Subnet ID: ").strip()

@@ -20,7 +20,6 @@ def main(s3):
                 access_type = input("Enter access type (public | private): ").strip().lower()
                 acl = 'public-read' if access_type == 'public' else 'private'
 
-                # Check if bucket already exists
                 try:
                     s3.head_bucket(Bucket=full_bucket_name)
                     print(f"Bucket {full_bucket_name} already exists.")
