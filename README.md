@@ -23,7 +23,7 @@ Supports session-based AWS credentials and structured CLI via `argparse`.
 
 ## 🚀 How to Run
 
-### 🐍 Locally with Python
+## 🐍 Locally with Python
 
 Install dependencies:
 
